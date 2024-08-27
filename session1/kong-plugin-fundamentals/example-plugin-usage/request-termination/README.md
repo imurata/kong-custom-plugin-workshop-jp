@@ -1,50 +1,48 @@
 ## Introduction
+.envをKong EEライセンス(必要な場合)、Kongのバージョン、Postgresのバージョンについて更新します。
 
-Update .env with Kong EE License (If required), Kong version and Postgres version
+localhostにKong Gatewayを立てない場合はKONG_PORTAL_GUI_URLとKONG_ADMIN_GUI_URLをホストIPに変更します。
 
-Modify KONG_PORTAL_GUI_URL and KONG_ADMIN_GUI_URL to your host IP if using cloud VM instead of localhost
-
-```
+```sh
 sed -i 's/localhost/<Your Host IP>/g' docker-compose.yml
 ```
-
-Start Kong and Database containers using docker-compose, before docker-compose up, we need to run database migrations
+docker-composeを使用してKong GatewayとDBコンテナを起動します。docker-composeを起動する前に、データベースの初期化を実行する必要があります。
 
 ```shell
 docker-compose run kong kong migrations bootstrap
 docker-compose up -d
 ```
 
-## Verify whether containers are up or not
+## コンテナの起動確認
 
 ```shell
-docker ps
-
-CONTAINER ID        IMAGE                                    COMMAND             CREATED             STATUS              PORTS                     NAMES
-be4733068e81   kong/kong-gateway:2.3.3.2-alpine   "/docker-entrypoint.…"   4 seconds ago    Up 2 seconds (healthy)    0.0.0.0:8000-8004->8000-8004/tcp, :::8000-8004->8000-8004/tcp, 0.0.0.0:8443-8445->8443-8445/tcp, :::8443-8445->8443-8445/tcp, 8446-8447/tcp   kong
-525c3dc73b92   postgres:13-alpine                 "docker-entrypoint.s…"   12 seconds ago   Up 11 seconds (healthy)   5432 tcp                                                                                                                                      kong-database
+$ docker ps 
+CONTAINER ID   IMAGE                        COMMAND               CREATED              STATUS              PORTS                NAMES
+50db1a0d3da8   postgres:13-alpine           "postgres"            About a minute ago   Up About a minute                        kong-database
+dbac4b654807   kong/kong-gateway:3.4.3.12   "kong docker-start"   About a minute ago   Up About a minute   8000/tcp, 8443/tcp   kong
 ```
 
-## Add a service
+## Serviceの追加
 
 ```shell
 http POST :8001/services name=example-service url=http://httpbin.org
 ```
 
-## Add a Route to the Service
+## ServiceにRouteを追加
 
 ```shell
 http POST :8001/services/example-service/routes name=terminate-route paths:='["/terminate"]'
 ```
 
-## Add Plugin to the Service
+## ServiceにPluginを追加
 
 ```shell
 http -f :8001/routes/terminate-route/plugins name=request-termination config.status_code=403 config.message="So long and thanks for all the fish\!"
 ```
 
-This will enable request termination plugin
-For available configuration values, please check https://docs.konghq.com/hub/kong-inc/request-termination/
+これによりRequest Termination Pluginが有効化されます。
+利用可能な設定値について以下を参照してください。
+https://docs.konghq.com/hub/kong-inc/request-termination/
 
 ## Test
 
@@ -57,16 +55,16 @@ Response:
 ```shell
 HTTP/1.1 403 Forbidden
 Connection: keep-alive
-Content-Length: 50
+Content-Length: 52
 Content-Type: application/json; charset=utf-8
-Date: Wed, 30 Jun 2021 07:17:58 GMT
-Server: kong/2.3.3.2-enterprise-edition
-X-Kong-Response-Latency: 51
+Date: Fri, 23 Aug 2024 01:51:32 GMT
+Server: kong/3.4.3.12-enterprise-edition
+X-Kong-Request-Id: 2acf400aa0135265a4dce12ad48f2820
+X-Kong-Response-Latency: 2
 
 {
-    "message": "So long and thanks for all the fish!"
+    "message": "So long and thanks for all the fish\\!"
 }
-
 ```
 
 ## Cleanup

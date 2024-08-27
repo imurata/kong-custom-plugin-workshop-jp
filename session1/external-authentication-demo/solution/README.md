@@ -1,24 +1,23 @@
-### Navigate to the plugin directory
-
+### プラグインのディレクトリに移動
 ```shell
 cd kong-plugin
 ```
 
-### Dependency defaults
+### 依存関係のデフォルト値の設定
 
-Update `.pongo/pongorc` file to disable cassandra
+Cssandraが不要な場合は `.pongo/pongorc` を編集して無効化してください。
 
 ```shell
 --no-cassandra
 ```
 
-## Bring up pongo dependencies
+## Pongoの起動
 
 ```shell
 pongo up
 ```
 
-To specify different versions of the dependencies or image or license_data
+異なるバージョン、イメージ、license_dataを指定するには環境変数を設定します。
 
 ```shell
 KONG_VERSION=2.3.x pongo up
@@ -26,44 +25,42 @@ POSTGRES=10 KONG_VERSION=2.3.3.x pongo up
 POSTGRES=10 KONG_LICENSE_DATA=<your_license_data> pongo up
 ```
 
-## Expose services
+## Serviceの公開
 
 ```shell
 pongo expose
 ```
 
-## Create a Kong container and attach a shell
+## Kongイメージをシェルで起動してアタッチ
 
 ```shell
 pongo shell
 ```
 
-The following commands should be run from within the Kong shell
+以下のコマンドは Kong シェルから実行する必要があります。
 
-## Boostrap the database and start kong
+## データベースの初期化
 
 ```shell
 kong migrations bootstrap --force
 kong start
 ```
 
-## Add a service
+## Serviceの追加
 
 ```shell
 http POST :8001/services name=example-service url=http://httpbin.org
 ```
 
-## Add a Route to the Service
+## RouteをServiceに追加
 
 ```shell
 http POST :8001/services/example-service/routes name=example-route paths:='["/echo"]'
 ```
 
-## Add MyPlugin to the Service
+## MyPluginをServiceに追加
 
-200 from authentication
-
-    Default authentication url is set to http://httpbin.org/status/200
+デフォルトの認証URLは http://httpbin.org/status/200 にセットされている。
 
 ```shell
 http -f :8001/services/example-service/plugins name=myplugin
@@ -77,13 +74,14 @@ HTTP/1.1 200 OK
 Access-Control-Allow-Credentials: true
 Access-Control-Allow-Origin: *
 Connection: keep-alive
-Content-Length: 555
+Content-Length: 572
 Content-Type: application/json
-Date: Wed, 30 Jun 2021 07:10:57 GMT
+Date: Mon, 26 Aug 2024 07:36:54 GMT
 Server: gunicorn/19.9.0
-Via: kong/2.4.1
-X-Kong-Proxy-Latency: 864
-X-Kong-Upstream-Latency: 537
+Via: kong/3.7.1
+X-Kong-Proxy-Latency: 7
+X-Kong-Request-Id: b6fd7469a115251c615b0b0d8049ee2d
+X-Kong-Upstream-Latency: 3
 
 {
     "args": {},
@@ -93,23 +91,23 @@ X-Kong-Upstream-Latency: 537
     "headers": {
         "Accept": "*/*",
         "Accept-Encoding": "gzip, deflate",
-        "Hello-World": "this is on a request",
         "Host": "httpbin.org",
-        "User-Agent": "HTTPie/1.0.3",
-        "X-Amzn-Trace-Id": "Root=1-60dc1901-42fd38e0768a65e74aba4eb4",
+        "User-Agent": "HTTPie/3.2.3",
+        "X-Amzn-Trace-Id": "Root=1-66cc3096-51298f265406de1f1680508e",
         "X-Forwarded-Host": "localhost",
         "X-Forwarded-Path": "/echo/anything",
-        "X-Forwarded-Prefix": "/echo"
+        "X-Forwarded-Prefix": "/echo",
+        "X-Kong-Request-Id": "b6fd7469a115251c615b0b0d8049ee2d"
     },
     "json": null,
     "method": "GET",
-    "origin": "127.0.0.1, 223.196.174.11",
+    "origin": "127.0.0.1, 44.199.73.142",
     "url": "http://localhost/anything"
 }
 
 ```
 
-403 from authentication
+403が返ってくる認証URLに変更する。
 
 ```shell
 http :8001/services/example-service/plugins
@@ -124,23 +122,25 @@ Response:
 HTTP/1.1 403 Forbidden
 Connection: keep-alive
 Content-Length: 21
-Date: Wed, 30 Jun 2021 07:12:21 GMT
-Server: kong/2.4.1
-X-Kong-Response-Latency: 856
+Date: Mon, 26 Aug 2024 07:38:28 GMT
+Server: kong/3.7.1
+X-Kong-Request-Id: 363c830a7c03543008c0681103227f4c
+X-Kong-Response-Latency: 4
 
 Authentication Failed
 ```
 
 # Clean up
 
-Exit from the shell created to the Kong container
+シェルから抜ける。
 
 ```shell
 exit
 ```
 
-Remove Pongo dependencies
+Pongoを停止する。
 
 ```shell
 pongo down
 ```
+

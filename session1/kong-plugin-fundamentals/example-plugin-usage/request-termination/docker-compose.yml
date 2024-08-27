@@ -23,7 +23,7 @@ services:
     container_name: kong
     restart: always
     environment:
-      - TZ=${TZ:-Asia/Kolkata}
+      - TZ=${TZ:-Asia/Tokyo}
       - KONG_DATABASE=postgres
       - KONG_PG_HOST=${KONG_PG_HOST:-kong-database}
       - KONG_PG_DATABASE=${POSTGRES_DB:-kong}
@@ -36,7 +36,6 @@ services:
       - KONG_ADMIN_GUI_URL=http://localhost:8002
       - KONG_ADMIN_LISTEN=${KONG_ADMIN_LISTEN:-127.0.0.1:8001}
       - KONG_PROXY_LISTEN=${KONG_PROXY_LISTEN:-0.0.0.0:8000, 0.0.0.0:8443 ssl http2}
-      - KONG_NGINX_HTTP_RESOLVER=${KONG_NGINX_HTTP_RESOLVER:-8.8.8.8}
       - KONG_PROXY_ERROR_LOG=/dev/stderr
       - KONG_ADMIN_ERROR_LOG=/dev/stderr
       - KONG_TRUSTED_IPS=0.0.0.0/0,::/0

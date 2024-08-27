@@ -1,23 +1,23 @@
-### Navigate to the plugin directory
+### プラグインのディレクトリに移動
 ```shell
 cd kong-plugin
 ```
 
-### Dependency defaults
+### 依存関係のデフォルト値の設定
 
-Update `.pongo/pongorc` file inside plugin folder to disable cassandra
+Cassandraが不要な場合は `.pongo/pongorc` を編集して無効化してください。
 
 ```shell
 --no-cassandra
 ```
 
-## Bring up pongo dependencies
+## Pongoの起動
 
 ```shell
 pongo up
 ```
 
-To specify different versions of the dependencies or image or license_data
+異なるバージョン、イメージ、license_dataを指定するには環境変数を設定します。
 
 ```shell
 KONG_VERSION=2.3.x pongo up
@@ -25,34 +25,34 @@ POSTGRES=10 KONG_VERSION=2.3.3.x pongo up
 POSTGRES=10 KONG_LICENSE_DATA=<your_license_data> pongo up
 ```
 
-## Expose services
+## Serviceの公開
 
 ```shell
 pongo expose
 ```
 
-## Create a Kong container and attach a shell
+## Kongイメージをシェルで起動してアタッチ
 
 ```shell
 pongo shell
 ```
 
-The following commands should be run from within the Kong shell
+以下のコマンドは Kong シェルから実行する必要があります。
 
-## Boostrap the database
+## データベースの初期化
 
 ```shell
 kong migrations bootstrap --force
 kong start
 ```
 
-## Add a service
+## Serviceの追加
 
 ```shell
 http POST :8001/services name=example-service url=http://httpbin.org
 ```
 
-## Add a Route to the Service
+## RouteをServiceに追加
 
 ```shell
 http POST :8001/services/example-service/routes name=example-route paths:='["/echo"]'
@@ -60,7 +60,7 @@ http POST :8001/services/example-service/routes name=example-route paths:='["/ec
 
 ### Test 1
 
-Enable plugin: Remove Accept Header
+プラグインを有効化し"Accept" Headerを削除する。
 
 ```shell
 http -f :8001/services/example-service/plugins name=myplugin config.remove_request_headers=accept
@@ -74,13 +74,14 @@ HTTP/1.1 200 OK
 Access-Control-Allow-Credentials: true
 Access-Control-Allow-Origin: *
 Connection: keep-alive
-Content-Length: 489
+Content-Length: 550
 Content-Type: application/json
-Date: Wed, 30 Jun 2021 07:26:42 GMT
+Date: Mon, 26 Aug 2024 06:50:55 GMT
 Server: gunicorn/19.9.0
-Via: kong/2.4.1
-X-Kong-Proxy-Latency: 114
-X-Kong-Upstream-Latency: 529
+Via: kong/3.7.1
+X-Kong-Proxy-Latency: 1
+X-Kong-Request-Id: d880675551c18d29619bbe592204bb7f
+X-Kong-Upstream-Latency: 5
 
 {
     "args": {},
@@ -90,15 +91,16 @@ X-Kong-Upstream-Latency: 529
     "headers": {
         "Accept-Encoding": "gzip, deflate",
         "Host": "httpbin.org",
-        "User-Agent": "HTTPie/1.0.3",
-        "X-Amzn-Trace-Id": "Root=1-60dc1cb2-7bc397f206e5182f512d0c34",
+        "User-Agent": "HTTPie/3.2.3",
+        "X-Amzn-Trace-Id": "Root=1-66cc25cf-3f64c70507549227465b3621",
         "X-Forwarded-Host": "localhost",
         "X-Forwarded-Path": "/echo/anything",
-        "X-Forwarded-Prefix": "/echo"
+        "X-Forwarded-Prefix": "/echo",
+        "X-Kong-Request-Id": "d880675551c18d29619bbe592204bb7f"
     },
     "json": null,
     "method": "GET",
-    "origin": "127.0.0.1, 223.196.172.10",
+    "origin": "127.0.0.1, 244.199.73.142",
     "url": "http://localhost/anything"
 }
 
@@ -107,7 +109,7 @@ X-Kong-Upstream-Latency: 529
 
 ### Test 2
 
-Enable plugin: Remove Accept-Encoding Header
+プラグインを有効化し"Accept-Encoding" Headerを削除する。
 
 ```shell
 http :8001/services/example-service/plugins
@@ -123,13 +125,14 @@ HTTP/1.1 200 OK
 Access-Control-Allow-Credentials: true
 Access-Control-Allow-Origin: *
 Connection: keep-alive
-Content-Length: 470
+Content-Length: 531
 Content-Type: application/json
-Date: Wed, 30 Jun 2021 07:27:29 GMT
+Date: Mon, 26 Aug 2024 06:53:34 GMT
 Server: gunicorn/19.9.0
-Via: kong/2.4.1
-X-Kong-Proxy-Latency: 301
-X-Kong-Upstream-Latency: 618
+Via: kong/3.7.1
+X-Kong-Proxy-Latency: 1
+X-Kong-Request-Id: 2f101158b54b1e66f7a38d49fa50f51c
+X-Kong-Upstream-Latency: 4
 
 {
     "args": {},
@@ -139,24 +142,26 @@ X-Kong-Upstream-Latency: 618
     "headers": {
         "Accept": "*/*",
         "Host": "httpbin.org",
-        "User-Agent": "HTTPie/1.0.3",
-        "X-Amzn-Trace-Id": "Root=1-60dc1ce1-1052e2d12dc38c6436de7968",
+        "User-Agent": "HTTPie/3.2.3",
+        "X-Amzn-Trace-Id": "Root=1-66cc266e-759d655d06cd515f0382ae7d",
         "X-Forwarded-Host": "localhost",
         "X-Forwarded-Path": "/echo/anything",
-        "X-Forwarded-Prefix": "/echo"
+        "X-Forwarded-Prefix": "/echo",
+        "X-Kong-Request-Id": "2f101158b54b1e66f7a38d49fa50f51c"
     },
     "json": null,
     "method": "GET",
-    "origin": "127.0.0.1, 223.196.168.24",
+    "origin": "127.0.0.1, 244.199.73.142",
     "url": "http://localhost/anything"
 }
+
 
 
 ```
 
 ### Test 3
 
-Enable plugin: Remove Both Accept and Accept-Encoding Header
+プラグインを有効化し"Accept"と"Accept-Encoding" Headerを削除する。
 
 ```shell
 http :8001/services/example-service/plugins
@@ -172,13 +177,14 @@ HTTP/1.1 200 OK
 Access-Control-Allow-Credentials: true
 Access-Control-Allow-Origin: *
 Connection: keep-alive
-Content-Length: 448
+Content-Length: 509
 Content-Type: application/json
-Date: Wed, 30 Jun 2021 07:28:16 GMT
+Date: Mon, 26 Aug 2024 06:55:05 GMT
 Server: gunicorn/19.9.0
-Via: kong/2.4.1
-X-Kong-Proxy-Latency: 95
-X-Kong-Upstream-Latency: 605
+Via: kong/3.7.1
+X-Kong-Proxy-Latency: 1
+X-Kong-Request-Id: f4aa8e34c9284d10f92fad73b9b3a13b
+X-Kong-Upstream-Latency: 2
 
 {
     "args": {},
@@ -187,15 +193,16 @@ X-Kong-Upstream-Latency: 605
     "form": {},
     "headers": {
         "Host": "httpbin.org",
-        "User-Agent": "HTTPie/1.0.3",
-        "X-Amzn-Trace-Id": "Root=1-60dc1d10-242220940c8f35971d00d4a3",
+        "User-Agent": "HTTPie/3.2.3",
+        "X-Amzn-Trace-Id": "Root=1-66cc26c9-59254dca390a42cb0e41833a",
         "X-Forwarded-Host": "localhost",
         "X-Forwarded-Path": "/echo/anything",
-        "X-Forwarded-Prefix": "/echo"
+        "X-Forwarded-Prefix": "/echo",
+        "X-Kong-Request-Id": "f4aa8e34c9284d10f92fad73b9b3a13b"
     },
     "json": null,
     "method": "GET",
-    "origin": "127.0.0.1, 223.196.168.24",
+    "origin": "127.0.0.1, 44.199.73.142",
     "url": "http://localhost/anything"
 }
 
@@ -204,13 +211,13 @@ X-Kong-Upstream-Latency: 605
 
 # Clean up
 
-Exit from the shell created to the Kong container
+シェルから抜ける。
 
 ```shell
 exit
 ```
 
-Remove Pongo dependencies
+Pongoを停止する。
 
 ```shell
 pongo down

@@ -1,55 +1,52 @@
 ## Introduction
+.envをKong EEライセンス(必要な場合)、Kongのバージョン、Postgresのバージョンについて更新します。
 
-Update .env with Kong EE License (If required), Kong version and Postgres version
+localhostにKong Gatewayを立てない場合はKONG_PORTAL_GUI_URLとKONG_ADMIN_GUI_URLをホストIPに変更します。
 
-Modify KONG_PORTAL_GUI_URL and KONG_ADMIN_GUI_URL to your host IP if using cloud VM instead of localhost
-
-```
+```sh
 sed -i 's/localhost/<Your Host IP>/g' docker-compose.yml
 ```
-
-Start Kong and Database containers using docker-compose, before docker-compose up, we need to run database migrations
+docker-composeを使用してKong GatewayとDBコンテナを起動します。docker-composeを起動する前に、データベースの初期化を実行する必要があります。
 
 ```shell
 docker-compose run kong kong migrations bootstrap
 docker-compose up -d
 ```
 
-## Verify whether containers are up or not
+## コンテナの起動確認
 
 ```shell
-docker ps
-
-CONTAINER ID        IMAGE                                    COMMAND             CREATED             STATUS              PORTS                     NAMES
-be4733068e81   kong/kong-gateway:2.3.3.2-alpine   "/docker-entrypoint.…"   4 seconds ago    Up 2 seconds (healthy)    0.0.0.0:8000-8004->8000-8004/tcp, :::8000-8004->8000-8004/tcp, 0.0.0.0:8443-8445->8443-8445/tcp, :::8443-8445->8443-8445/tcp, 8446-8447/tcp   kong
-525c3dc73b92   postgres:13-alpine                 "docker-entrypoint.s…"   12 seconds ago   Up 11 seconds (healthy)   5432 tcp                                                                                                                                      kong-database
+$ docker ps 
+CONTAINER ID   IMAGE                        COMMAND               CREATED              STATUS              PORTS                NAMES
+50db1a0d3da8   postgres:13-alpine           "postgres"            About a minute ago   Up About a minute                        kong-database
+dbac4b654807   kong/kong-gateway:3.4.3.12   "kong docker-start"   About a minute ago   Up About a minute   8000/tcp, 8443/tcp   kong
 ```
 
-## Add a service
+## Serviceの追加
 
 ```shell
 http POST :8001/services name=example-service url=http://httpbin.org
 ```
 
-## Add a Route to the Service
+## ServiceにRouteを追加
 
 ```shell
-http POST :8001/services/example-service/routes name=example-route paths:='["/transform"]'
+http POST :8001/services/example-service/routes name=transform-route paths:='["/transform"]'
 ```
 
-## Add Plugin to the Service
+## ServiceにPluginを追加
 
 ```shell
 http -f POST :8001/services/example-service/plugins name=request-transformer config.remove.headers=accept config.remove.querystring=custId config.remove.body=custId
 ```
-
-This will enable request transformer plugin which will remove `accept` header, `custId` in query string and `custId` in body
-For available configuration values, please check https://docs.konghq.com/hub/kong-inc/request-transformer/
+Request Transformer Pluginを有効にし、`accept` ヘッダ、クエリ文字列の `custId`、および本文の `custId` を削除します。
+利用可能な設定値について以下を参照してください。
+https://docs.konghq.com/hub/kong-inc/request-transformer/
 
 ## Test
 
 ```shell
-http :8000/transform/anything custId==200 a==100 #query string
+http :8000/transform/anything custId==200 a==100 
 ```
 
 Response:
@@ -59,13 +56,14 @@ HTTP/1.1 200 OK
 Access-Control-Allow-Credentials: true
 Access-Control-Allow-Origin: *
 Connection: keep-alive
-Content-Length: 525
+Content-Length: 588
 Content-Type: application/json
-Date: Wed, 30 Jun 2021 07:22:58 GMT
+Date: Fri, 23 Aug 2024 02:56:53 GMT
 Server: gunicorn/19.9.0
-Via: kong/2.3.3.2-enterprise-edition
-X-Kong-Proxy-Latency: 1525
-X-Kong-Upstream-Latency: 587
+Via: kong/3.4.3.12-enterprise-edition
+X-Kong-Proxy-Latency: 1171
+X-Kong-Request-Id: 7c38c95f9d4d0004974b741344ca6d39
+X-Kong-Upstream-Latency: 528
 
 {
     "args": {
@@ -77,69 +75,18 @@ X-Kong-Upstream-Latency: 587
     "headers": {
         "Accept-Encoding": "gzip, deflate",
         "Host": "httpbin.org",
-        "User-Agent": "HTTPie/2.3.0",
-        "X-Amzn-Trace-Id": "Root=1-60dc1bd2-2f702728664edef83272ae9f",
+        "User-Agent": "HTTPie/3.2.2",
+        "X-Amzn-Trace-Id": "Root=1-66c7fa75-0b325b526e7df97a5fc47ead",
         "X-Forwarded-Host": "localhost",
         "X-Forwarded-Path": "/transform/anything",
-        "X-Forwarded-Prefix": "/transform"
+        "X-Forwarded-Prefix": "/transform",
+        "X-Kong-Request-Id": "7c38c95f9d4d0004974b741344ca6d39"
     },
     "json": null,
     "method": "GET",
-    "origin": "172.25.0.1, 223.196.173.146",
+    "origin": "192.168.127.1, 214.215.6.147",
     "url": "http://localhost/anything?a=100"
 }
-
-
-
-```
-
-```shell
-http :8000/transform/anything a==200 custId=200 another=abc #body
-```
-
-Response:
-
-```shell
-HTTP/1.1 200 OK
-Access-Control-Allow-Credentials: true
-Access-Control-Allow-Origin: *
-Connection: keep-alive
-Content-Length: 639
-Content-Type: application/json
-Date: Wed, 30 Jun 2021 07:23:52 GMT
-Server: gunicorn/19.9.0
-Via: kong/2.3.3.2-enterprise-edition
-X-Kong-Proxy-Latency: 257
-X-Kong-Upstream-Latency: 725
-
-{
-    "args": {
-        "a": "200"
-    },
-    "data": "{\"another\":\"abc\"}",
-    "files": {},
-    "form": {},
-    "headers": {
-        "Accept-Encoding": "gzip, deflate",
-        "Content-Length": "17",
-        "Content-Type": "application/json",
-        "Host": "httpbin.org",
-        "User-Agent": "HTTPie/2.3.0",
-        "X-Amzn-Trace-Id": "Root=1-60dc1c08-4c2c16d535aee26a00cc80ef",
-        "X-Forwarded-Host": "localhost",
-        "X-Forwarded-Path": "/transform/anything",
-        "X-Forwarded-Prefix": "/transform"
-    },
-    "json": {
-        "another": "abc"
-    },
-    "method": "POST",
-    "origin": "172.25.0.1, 223.196.173.146",
-    "url": "http://localhost/anything?a=200"
-}
-
-
-
 ```
 
 ## Cleanup

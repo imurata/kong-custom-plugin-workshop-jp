@@ -1,31 +1,29 @@
 ## Introduction
 
-Prior to this exercise, it is assumed you have setup Pongo
+この練習の前に、Pongoをセットアップしているものとします。
 
-Clone the Kong plugin template if not present: https://github.com/Kong/kong-plugin.git
+もしKong plugin templateがなければCloneしてください: https://github.com/Kong/kong-plugin.git
 
 ```shell
-    git clone https://github.com/Kong/kong-plugin.git
-    cd kong-plugin
+git clone https://github.com/Kong/kong-plugin.git
+cd kong-plugin
 ```
 
-Below commands needs to be running inside plugin folder
+### 依存関係のデフォルト値の設定
 
-### Dependency defaults
-
-Update `.pongo/pongorc` to disable cassandra if not required as a datastore (postgres is enabled by default)
+Cssandraが不要な場合は `.pongo/pongorc` を編集して無効化してください。(postgresがデフォルトで有効化されています)
 
 ```shell
 --no-cassandra
 ```
 
-## Bring up pongo dependencies
+## Pongoの起動
 
 ```shell
 pongo up
 ```
 
-To specify different versions of the dependencies or image or license_data
+異なるバージョン、イメージ、license_dataを指定するには環境変数を設定します。
 
 ```shell
 KONG_VERSION=2.3.x pongo up
@@ -33,46 +31,46 @@ POSTGRES=10 KONG_VERSION=2.3.3.x pongo up
 POSTGRES=10 KONG_LICENSE_DATA=<your_license_data> pongo up
 ```
 
-## Expose services
+## Serviceの公開
 
 ```shell
 pongo expose
 ```
 
-## Create a Kong container and attach a shell
+## Kongイメージをシェルで起動してアタッチ
 
 ```shell
 pongo shell
 ```
 
-The following commands should be run from within the Kong shell
+以下のコマンドは Kong シェルから実行する必要があります。
 
-## Boostrap the database
+## データベースの初期化
 
 ```shell
 kong migrations bootstrap --force
 kong start
 ```
 
-## Add a service
+## Serviceの追加
 
 ```shell
 http POST :8001/services name=example-service url=http://httpbin.org
 ```
 
-## Add a Route to the Service
+## RouteをServiceに追加
 
 ```shell
 http POST :8001/services/example-service/routes name=example-route paths:='["/echo"]'
 ```
 
-## Add MyPlugin to the Service
+## MyPluginをServiceに追加
 
 ```shell
 http -f :8001/services/example-service/plugins name=myplugin
 ```
 
-## Test
+## テスト
 
 ```shell
 http :8000/echo/anything
@@ -86,13 +84,14 @@ Access-Control-Allow-Credentials: true
 Access-Control-Allow-Origin: *
 Bye-World: this is on the response
 Connection: keep-alive
-Content-Length: 556
+Content-Length: 616
 Content-Type: application/json
-Date: Wed, 30 Jun 2021 07:32:51 GMT
+Date: Mon, 26 Aug 2024 03:13:14 GMT
 Server: gunicorn/19.9.0
-Via: kong/2.4.1
-X-Kong-Proxy-Latency: 140
-X-Kong-Upstream-Latency: 568
+Via: kong/3.7.1
+X-Kong-Proxy-Latency: 10
+X-Kong-Request-Id: 49f36402fc39e43234549d23fe46444c
+X-Kong-Upstream-Latency: 2
 
 {
     "args": {},
@@ -104,58 +103,57 @@ X-Kong-Upstream-Latency: 568
         "Accept-Encoding": "gzip, deflate",
         "Hello-World": "this is on a request",
         "Host": "httpbin.org",
-        "User-Agent": "HTTPie/1.0.3",
-        "X-Amzn-Trace-Id": "Root=1-60dc1e23-332e478c63f3ca0551ffb795",
+        "User-Agent": "HTTPie/3.2.3",
+        "X-Amzn-Trace-Id": "Root=1-66cbf2ca-108decc258980bed0ff4d812",
         "X-Forwarded-Host": "localhost",
         "X-Forwarded-Path": "/echo/anything",
-        "X-Forwarded-Prefix": "/echo"
+        "X-Forwarded-Prefix": "/echo",
+        "X-Kong-Request-Id": "49f36402fc39e43234549d23fe46444c"
     },
     "json": null,
     "method": "GET",
-    "origin": "127.0.0.1, 223.196.173.146",
+    "origin": "127.0.0.1, 244.199.73.142",
     "url": "http://localhost/anything"
 }
-
 ```
 
-# Add a log entry to each phase
+# 各フェーズにログエントリを追加
 
-In another terminal, update `handler.lua` to add a log line for each phase
-
+もう1つのターミナルで`handler.lua`を開き、ログ出力のために各フェーズに以下を追加する。
 ```lua
 kong.log.debug(" In phase <name of phase>")
 ```
 
-Tail the kongs logs in a separate window, run
+分割したウィンドウでログをtailで表示させながら実行する。
 
 ```shell
 cd kong-plugin
 tail -f servroot/logs/error.log
 ```
 
-# Go back to the Kong shell and reload Kong to pick up latest plugin changes
+# Kongシェルに戻り、Kongをリロードして最新のプラグインの変更を取り込む
 
 ```shell
 kong reload
 ```
 
-# Test
+# テスト
 
 ```shell
 http :8000/echo/anything
 ```
 
-Validate that you can see log entries for all the logs
+すべてのログのログエントリが表示されることを確認する。
 
 # Clean up
 
-Exit from the shell created to the Kong container
+シェルから抜ける。
 
 ```shell
 exit
 ```
 
-Remove Pongo dependencies
+Pongoを停止する。
 
 ```shell
 pongo down

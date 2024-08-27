@@ -1,80 +1,84 @@
 ## Requirements
 
-Tools Pongo needs to run:
+Pongoを実行するために以下が必要となります。
 
-- `docker-compose` (and hence `docker`)
+- `docker-compose` (とそのための `docker`)
 - `curl`
-- `realpath`, for MacOS you need the [`coreutils`](https://www.gnu.org/software/coreutils/coreutils.html)
-  to be installed. This is easiest via the [Homebrew package manager](https://brew.sh/) by doing:
+- `realpath`, Macであれば[`coreutils`](https://www.gnu.org/software/coreutils/coreutils.html)のインストールが必要。brewが使えるなら以下でインストール可能。
   ```
   brew install coreutils
   ```
-- depending on your environment you should set some [environment variables](#configuration).
 
-## Clone kong plugin template (if not already present)
 
-```shell
-    git clone https://github.com/Kong/kong-plugin
-```
-
-## Download and setup pongo from its Git Repo
+## kong plugin templateのclone (カレントディレクトリのものを使う場合は不要)
 
 ```shell
-    PATH=$PATH:~/.local/bin
-    git clone https://github.com/Kong/kong-pongo.git
-    mkdir -p ~/.local/bin
-    ln -s $(realpath kong-pongo/pongo.sh) ~/.local/bin/pongo
+git clone https://github.com/Kong/kong-plugin
 ```
 
-## Environment variables:
+## PongのDownloadとsetup
 
 ```shell
-KONG_VERSION the specific Kong version to use when building the test image
-(note that the patch-version can be 'x' to use latest)
-
-KONG_IMAGE the base Kong Docker image to use when building the test image
-
-KONG_LICENSE_DATA
-set this variable with the Kong Enterprise license data
-
-POSTGRES the version of the Postgres dependency to use (default 9.5)
-CASSANDRA the version of the Cassandra dependency to use (default 3.9)
-REDIS the version of the Redis dependency to use (default 5.0.4)
+PATH=$PATH:~/.local/bin
+git clone https://github.com/Kong/kong-pongo.git
+mkdir -p ~/.local/bin
+ln -s $(realpath kong-pongo/pongo.sh) ~/.local/bin/pongo
 ```
 
-### Example usage:
+## 環境変数
+
+```shell
+KONG_VERSION テストイメージのビルドに使用するKongのバージョン。
+(注：パッチバージョンに'x'を指定すると、最新のパッチバージョンが適用されます。)
+
+KONG_IMAGE テストイメージを構築する際に使用するベースとなるKongのコンテナイメージ。
+
+KONG_LICENSE_DATA Kong Enterpriseライセンスのjsonデータ。
+
+POSTGRES 使用するPostgres依存のバージョン (default 9.5)
+CASSANDRA 使用するCassandra依存関係のバージョン (default 3.9)
+REDIS 使用するRedis依存のバージョン (default 5.0.4)
+```
+
+### コマンド実行例
 
 ```shell
 pongo run
+```
+```sh
 KONG_VERSION=1.3.x pongo run -v -o gtest ./spec/myplugin/02-access_spec.lua
+```
+```sh
 POSTGRES=10 KONG_VERSION=2.3.x pongo run
+```
+```sh
 pongo down
 ```
 
-## Do a test run
+## 実行する
 
+以下を実行してテストが実行されることを確認する。
 ```shell
-    cd kong-plugin
-
-    # auto pull and build the test images
-    pongo run
+cd kong-plugin
+pongo run --no-cassandra
 ```
 
-Some more elaborate examples:
+少し複雑な実行例。
 
 ```shell
-    # Run against a specific version of Kong and pass
-    # a number of Busted options
-    KONG_VERSION=2.3.2 pongo run -v -o gtest ./spec
+# Kongの特定のバージョンを指定し、
+# -vと-o gtestは以下のような形でbustedの引数を渡す
+# 'bin/busted --helper=/pongo/busted_helper.lua -v -o # gtest /kong-plugin/spec'
+KONG_VERSION=3.4.0 pongo run -v -o gtest ./spec
 
-    # Run against the latest patch version of a Kong release using '.x'
-    KONG_VERSION=2.3.x pongo run -v -o gtest ./spec
+# .x'を使ってKongリリースの最新パッチバージョンに対して実行する。
+KONG_VERSION=3.4.x pongo run -v -o gtest ./spec
 ```
 
-The above command (pongo run) will automatically build the test image and start the test environment. When done, the test environment can be torn down by:
+上記のコマンド（`pongo run`）は自動的にテストイメージをビルドし、テスト環境を起動します。終了したら、テスト環境は次のようにして取り壊すことができます。
 
 ```shell
-    pongo down
+pongo down
 ```
 
 ## Test dependencies
@@ -87,31 +91,36 @@ by adding them to the `.pongo/pongorc` file (see below).
 
 The available dependencies are:
 
-- **Postgres** Kong datastore (started by default)
+Pongo では、テストに使う依存関係のセットを使うことができます。それぞれ`--[dependency_name]` または`--no-[dependency-name]` を `pongo up`, `pongo restart`, `pongo run` コマンドのオプションとして指定します。
+依存関係を指定する別の方法は`.pongo/pongorc` ファイルに追加することです（下記参照）。
 
-  - Disable it with `--no-postgres`
-  - The Postgres version is controlled by the `POSTGRES` environment variable
+利用可能な依存関係は以下の通りです：
 
-- **Cassandra** Kong datastore (started by default)
+- **Postgres** Kongのデータストア (デフォルトで指定される)
 
-  - Disable it with `--no-cassandra`
-  - The Cassandra version is controlled by the `CASSANDRA` environment variable
+  - `--no-postgres`で無効化できる
+  - `POSTGRES`環境変数でバージョン指定できる
 
-- **grpcbin** mock grpc backend
+- **Cassandra** Kongのデータストア (デフォルトで指定される)
 
-  - Enable it with `--grpcbin`
-  - The engine is [moul/grpcbin](https://github.com/moul/grpcbin)
-  - From within the environment it is available at:
+  - `--no-cassandra`で無効化できる
+  - `CASSANDRA`環境変数でバージョン指定できる
+
+- **grpcbin**  grpcのバックエンドのモック
+
+  - `--grpcbin`で有効化できる
+  - エンジンは[moul/grpcbin](https://github.com/moul/grpcbin)
+  - 環境内からは以下でアクセスできる
     - `grpcbin:9000` grpc over http
     - `grpcbin:9001` grpc over http+tls
 
-- **Redis** key-value store
+- **Redis** キーバリューストア
 
-  - Enable it with `--redis`
-  - The Redis version is controlled by the `REDIS` environment variable
-  - From within the environment the Redis instance is available at `redis:6379`,
-    but from the test specs it should be accessed by using the `helpers.redis_host`
-    field, and port `6379`, to keep it portable to other test environments. Example:
+  - `--redis`で有効化できる
+  - `REDIS`環境変数でバージョン指定できる
+  - 環境内から`redis:6379`でアクセスできる。
+    しかし他の環境への移行性を考慮し、test specからは`helpers.redis_host`フィールドと`6379`ポートを使ってアクセスすべきである。
+    Example:
     ```shell
     local helpers = require "spec.helpers"
     local redis_host = helpers.redis_host
@@ -120,121 +129,109 @@ The available dependencies are:
 
 - **Squid** (forward-proxy)
 
-  - Enable it with `--squid`
-  - The Squid version is controlled by the `SQUID` environment variable
-  - From within the environment the Squid instance is available at `squid:3128`.
-    Essentially it would be configured as these standard environment variables:
+  - `--squid`で有効化できる
+  - `SQUID`環境変数でバージョン指定できる
+  - 環境内から`squid:3128`でアクセスできる。
+    基本的には以下のように標準的な環境変数として設定される。
 
     - `http_proxy=http://squid:3128/`
     - `https_proxy=http://squid:3128/`
 
-    The configuration comes with basic-auth configuration, and a single user:
+    設定には、ベーシック認証設定と1ユーザーが付属している。
 
     - username: `kong`
     - password: `king`
 
-    All access is to be authenticated by the proxy, except for the domain `.mockbin.org`,
-    which is white-listed.
+    `.mockbin.org`というドメインを除いて、すべてのアクセスはプロキシによって認証される。
+    これはホワイトリストに登録されている。
 
-    Some test instructions to play with the proxy:
+    プロキシを使ったいくつかの実行例：
 
     ```shell
-    # clean environment, start with squid and create a shell
+    # クリーンな環境で、squidを起動しシェルを立ち上げる
     pongo down
     pongo up --squid --no-postgres --no-cassandra
     pongo shell
 
-    # connect to httpbin (http), while authenticating
+    # httpbin (http)に認証付きでアクセス
     http --proxy=http:http://kong:king@squid:3128 --proxy=https:http://kong:king@squid:3128 http://httpbin.org/anything
 
-    # https also works
+    # httpsも同様
     http --proxy=http:http://kong:king@squid:3128 --proxy=https:http://kong:king@squid:3128 https://httpbin.org/anything
 
-    # connect unauthenticated to the whitelisted mockbin.org (http)
+    # 認証なしでホワイトリストにある mockbin.org (http)にアクセス
     http --proxy=http:http://squid:3128 --proxy=https:http://squid:3128 http://mockbin.org/request
 
-    # and here https also works
+    # httpsも同様
     http --proxy=http:http://squid:3128 --proxy=https:http://squid:3128 https://mockbin.org/request
     ```
 
-### Dependency defaults
+### 依存関係のデフォルト値の設定
+デフォルトはプラグインの種類によっては意味を成しませんし、依存関係によっては（例えばCassandra）テストが遅くなることもあります。そこで、プロジェクトやプラグインごとにデフォルトを上書きするために、`.pongo/pongorc`ファイルをプロジェクトに追加します。
 
-The defaults do not make sense for every type of plugin and some dependencies
-(Cassandra for example) can slow down the tests. So to override the defaults on
-a per project/plugin basis, a `.pongo/pongorc` file can be added
-to the project.
-
-The format of the file is very simple; each line contains 1 commandline option, eg.
-a `.pongo/pongorc` file for a plugin that only needs Postgres and Redis:
+ファイルのフォーマットはとてもシンプルです。各行には1つのコマンドラインオプションが含まれています。例えば、PostgresとRedisだけが必要なプラグイン用の`.pongo/pongorc`ファイルです：
 
 ```shell
 --no-cassandra
 --redis
 ```
+### 依存関係のトラブルシューティング
 
-### Dependency troubleshooting
+依存関係のあるコンテナが問題を起こしているときは、`pongo logs` コマンドを使ってログにアクセスすることができます。
+このコマンドは `docker-compose logs` と同じですが、Pongo環境でのみ動作します。
+コマンドに指定された追加オプションは `docker-compose logs` コマンドにそのまま渡されます。
 
-When dependency containers are causing trouble, the logs can be accessed using
-the `pongo logs` command. This command is the same as `docker-compose logs` except
-that it operates on the Pongo environment specifically. Any additional options
-specified to the command will be passed to the underlying `docker-compose logs`
-command.
-
-Some examples:
+いくつかの実行例：
 
 ```shell
-# show latest logs
+# 最新のlogの表示
 pongo logs
 
-# tail latest logs
+# tailで最新のlogを表示
 pongo logs -f
 
-# tail latest logs for the postgres dependency
+# Postgresの依存関係に関する最新のログをtailで表示
 pongo logs -f postgres
 ```
 
-## Accessing logs
+## logへのアクセス
+テストを実行する場合、作業ディレクトリは`./servroot`に設定されます。
 
-When running the tests, the Kong prefix (or working directory) will be set to ./servroot.
-
-To track the error log (where any print or ngx.log statements will go) you can use the tail command
+エラーログ（printまたはngx.logステートメントが保存される場所）を追跡するには、`tail`コマンドを使用します。
 
 ```shell
     pongo tail
 ```
 
-## Direct access to service ports
+## サービスポートへの直接のアクセス
+ホストやデータストアからKongに直接アクセスするには、`pongo expose`コマンドを使って内部ポートをホストに公開します。
 
-To directly access Kong from the host, or the datastores, the pongo expose command can be used to expose the internal ports to the host.
+これにより、例えば5432番ポートのPostgresに接続してデータベースの内容を検証することができます。また、`pongo shell`を実行して手動でKongを起動すると、GUIを含む通常のKongポートすべてにホストからアクセスできます。
 
-This allows for example to connect to the Postgres on port 5432 to validate the contents of the database. Or when running pongo shell to manually start Kong, you can access all the regular Kong ports from the host, including the GUI's.
+これは別のコンテナとして実装されており、そのコンテナはすべてのポートを開き、docker network上で実際のサービスコンテナに中継します（この理由は、通常のPongoの実行はホスト上ですでに使われているポートに干渉しないためです。）
 
-This has been implemented as a separate container that opens all those ports and relays them on the docker network to the actual service containers (the reason for this is that regular Pongo runs do not interfere with ports already in use on the host, only if expose is used there is a risk of failure because ports are already in use on the host)
-
-Since it is technically a "dependency" it can be specified as a dependency as well.
-
-so
+これは技術的には 「依存関係 」なので、依存関係として指定することもできます。
 
 ```shell
     pongo up
     pongo expose
 ```
 
-is equivalent to
+これは以下と等価となります。
 
 ```shell
     pongo up --expose
 ```
 
-See pongo expose --help for the ports.
+`pongo expose --help`でさらなる説明が確認できます。
 
 ## Cleanup
 
-To clean up, run
+クリーンアップするには以下を実行します。
 
 ```shell
 pongo down
 ```
 
-For latest information refer pango repo
+最新の情報は以下から確認できます。
 https://github.com/Kong/kong-pongo/

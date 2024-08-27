@@ -1,6 +1,5 @@
-## Problem Statement
+## 検証の内容
 
-1. Update the Kong plugin template to add a plugin configuration field to remove request headers from the API request before sending it to the upstream
-2. The plugin configuration should specify a list of headers to be removed
-3. Update the plugin code to use the added configuration field(s) and validate the plugin behavior
-
+1. Kong plugin templateを更新し、Upstreamに送信する前にAPIリクエストからリクエストヘッダを削除するプラグインの設定フィールドを追加する。
+2. プラグインの設定には、削除するヘッダのリストを指定する。
+3. 追加した設定フィールドを使用するようにプラグインのコードを更新し、プラグインの動作を検証する。

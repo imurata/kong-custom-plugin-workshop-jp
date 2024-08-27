@@ -1,18 +1,18 @@
-## Comments
+## コメント
 
 ```lua
--- comment
---[[ Multiline
-     comment ]]
+-- コメント
+--[[ 複数行の
+     コメント ]]
 ```
 
-## Invoking functions
+## 関数呼び出し
 
 ```lua
 print()
 print("Hi")
 
--- You can omit parentheses if the argument is one string or table literal
+-- 引数が文字列またはテーブル形式の場合は括弧を省略できます。
 print "Hello World"     <-->     print("Hello World")
 dofile 'a.lua'          <-->     dofile ('a.lua')
 print [[a multi-line    <-->     print([[a multi-line
@@ -21,7 +21,7 @@ f{x=10, y=20}           <-->     f({x=10, y=20})
 type{}                  <-->     type({})
 ```
 
-## Tables / arrays
+## テーブル / 列
 
 ```lua
 t = {}
@@ -31,13 +31,13 @@ t.a = function() ... end
 t = { ["hello"] = 200 }
 t.hello
 
--- Remember, arrays are also tables
+-- 列はテーブルでもある
 array = { "a", "b", "c", "d" }
 print(array[2])       -- "b" (one-indexed)
 print(#array)         -- 4 (length)
 ```
 
-## Loops
+## 繰り返し
 
 ```lua
 while condition do
@@ -55,13 +55,13 @@ end
 repeat
 until condition
 
--- Breaking out:
+-- Break文
 while x do
   if condition then break end
 end
 ```
 
-## Conditionals
+## 条件式
 
 ```lua
 if condition then
@@ -89,11 +89,11 @@ anonymousFunctions(function()
   -- ...
 end)
 
--- Not exported in the module
+-- モジュールにExportされない
 local function myPrivateFunction()
 end
 
--- Splats
+-- Splats（可変引数）
 function doAction(action, ...)
   print("Doing '"..action.."' to", ...)
   --> print("Doing 'write' to", "Shirley", "Abed")
@@ -103,11 +103,11 @@ doAction('write', "Shirley", "Abed")
 Lookups
 mytable = { x = 2, y = function() .. end }
 
--- The same:
+-- 以下は同じ意味:
 mytable.x
 mytable['x']
 
--- Syntactic sugar, these are equivalent:
+-- 糖衣構文。以下は同じ意味:
 mytable.y(mytable)
 mytable:y()
 
@@ -119,21 +119,21 @@ function X.y(self, z) .. end
 Metatables
 mt = {}
 
--- A metatable is simply a table with functions in it.
+-- メタテーブルは、単に関数を含むテーブルです。
 mt.__tostring = function() return "lol" end
 mt.__add      = function(b) ... end       -- a + b
 mt.__mul      = function(b) ... end       -- a * b
 mt.__index    = function(k) ... end       -- Lookups (a[k] or a.k)
 mt.__newindex = function(k, v) ... end    -- Setters (a[k] = v)
 
--- Metatables allow you to override behavior of another table.
+-- メタテーブルを使用すると、別のテーブルの動作をオーバーライドできます。
 mytable = {}
 setmetatable(mytable, mt)
 
 print(myobject)
 ```
 
-## Classes
+## クラス
 
 ```lua
 Account = {}
@@ -141,7 +141,7 @@ Account = {}
 function Account:new(balance)
   local t = setmetatable({}, { __index = Account })
 
-  -- Your constructor stuff
+  -- コンストラクタ
   t.balance = (balance or 0)
   return t
 end
@@ -157,10 +157,10 @@ function Account:report()
 end
 
 a = Account:new(9000)
-a:withdraw(200)    -- method call
+a:withdraw(200)    -- メソッド呼び出し
 ```
 
-## Constants
+## 定数
 
 ```lua
 nil
@@ -168,35 +168,35 @@ false
 true
 ```
 
-## Operators (and their metatable names)
+## 演算子 (とメタテーブルの名前)
 
 ```lua
--- Relational (binary)
+-- 関係演算子 (binary)
 -- __eq  __lt  __gt  __le  __ge
    ==    <     >     <=    >=
-~=   -- Not equal, just like !=
+~=   -- Not equal, != のようなもの
 
--- Arithmetic (binary)
+-- 算術演算子 (binary)
 -- __add  __sub  __muv  __div  __mod  __pow
    +      -      *      /      %      ^
 
--- Arithmetic (unary)
--- __unm (unary minus)
+-- 算術演算子 (単項)
+-- __unm (単項でのマイナス)
    -
 
--- Logic (and/or)
+-- 論理演算子 (and/or)
 nil and false  --> nil
 false and nil  --> false
 0 and 20       --> 20
 10 and 20      --> 20
 
 
--- Length
+-- 長さ
 -- __len(array)
 #array
 
 
--- Indexing
+-- インデックス
 -- __index(table, key)
 t[key]
 t.key
@@ -204,34 +204,34 @@ t.key
 -- __newindex(table, key, value)
 t[key]=value
 
--- String concat
+-- 文字列の連結
 -- __concat(left, right)
 "hello, "..name
 
--- Call
+-- 呼び出し
 -- __call(func, ...)
 ```
 
-## API: Global functions (ref)
+## API: Global function (ref)
 
 ```lua
 dofile("hello.lua")
 loadfile("hello.lua")
 
-assert(x)    -- x or (raise an error)
+assert(x)    -- x かどうか (errorをあげる)
 assert(x, "failed")
 
 type(var)   -- "nil" | "number" | "string" | "boolean" | "table" | "function" | "thread" | "userdata"
 
--- Does /not/ invoke meta methods (__index and __newindex)
+-- メタメソッドを呼び出さない (__index and __newindex)
 rawset(t, index, value)    -- Like t[index] = value
 rawget(t, index)           -- Like t[index]
 
-_G  -- Global context
-setfenv(1, {})  -- 1: current function, 2: caller, and so on -- {}: the new _G
+_G  -- グローバルコンテキスト
+setfenv(1, {})  -- 1: 現在の関数, 2: 呼び出し元など -- {}: the new _G
 
-pairs(t)     -- iterable list of {key, value}
-ipairs(t)    -- iterable list of {index, value}
+pairs(t)     -- {key, value}の反復可能リスト
+ipairs(t)    -- {index, value}の反復可能リスト
 
 tonumber("34")
 tonumber("8f", 16)
@@ -241,7 +241,7 @@ API: Strings
 s = "Hello"
 s:upper()
 s:lower()
-s:len()    -- Just like #s
+s:len()    -- #s のようなもの
 
 s:find()
 s:gfind()
@@ -287,7 +287,7 @@ math.sqrt(144)
 math
 ```
 
-## API: Misc
+## API: その他
 
 ```lua
 io.output(io.open("file.txt", "w"))

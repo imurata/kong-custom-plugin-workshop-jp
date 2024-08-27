@@ -1,5 +1,5 @@
 # kong-custom-plugin-workshop
 
-This repository contains the hands on demos and exercises that accompany the custom plugin workshops. 
+このリポジトリには、Custom Plugin Workshopに付随するデモや練習問題が含まれています。
 
-Refer to the Readmes in each directory for more information
+詳細は各ディレクトリのReadmeを参照してください。
