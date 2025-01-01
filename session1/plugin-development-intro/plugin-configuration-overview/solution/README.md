@@ -3,14 +3,6 @@
 cd kong-plugin
 ```
 
-### 依存関係のデフォルト値の設定
-
-Cassandraが不要な場合は `.pongo/pongorc` を編集して無効化してください。
-
-```shell
---no-cassandra
-```
-
 ## Pongoの起動
 
 ```shell

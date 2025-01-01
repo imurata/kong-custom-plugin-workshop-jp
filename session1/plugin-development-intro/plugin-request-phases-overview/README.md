@@ -9,14 +9,6 @@ git clone https://github.com/Kong/kong-plugin.git
 cd kong-plugin
 ```
 
-### 依存関係のデフォルト値の設定
-
-Cssandraが不要な場合は `.pongo/pongorc` を編集して無効化してください。(postgresがデフォルトで有効化されています)
-
-```shell
---no-cassandra
-```
-
 ## Pongoの起動
 
 ```shell
@@ -43,6 +35,11 @@ pongo expose
 pongo shell
 ```
 
+また、以降の作業で出力されるカスタムプラグインのログを確認するために、以下でログを表示します。
+```sh
+tail -f  servroot/logs/error.log |grep myplugin
+```
+
 以下のコマンドは Kong シェルから実行する必要があります。
 
 ## データベースの初期化
@@ -51,6 +48,8 @@ pongo shell
 kong migrations bootstrap --force
 kong start
 ```
+
+このタイミングで`init_worker`のログが確認できます。
 
 ## Serviceの追加
 
@@ -117,18 +116,13 @@ X-Kong-Upstream-Latency: 2
 }
 ```
 
+この時、ログから`access`、`body_filter`、`log`のハンドラ呼び出しが確認できます。
+
 # 各フェーズにログエントリを追加
 
-もう1つのターミナルで`handler.lua`を開き、ログ出力のために各フェーズに以下を追加する。
+もう1つのターミナルで`handler.lua`を開き、ログ出力のために他のフェーズに以下を追加します。
 ```lua
 kong.log.debug(" In phase <name of phase>")
-```
-
-分割したウィンドウでログをtailで表示させながら実行する。
-
-```shell
-cd kong-plugin
-tail -f servroot/logs/error.log
 ```
 
 # Kongシェルに戻り、Kongをリロードして最新のプラグインの変更を取り込む
@@ -143,17 +137,17 @@ kong reload
 http :8000/echo/anything
 ```
 
-すべてのログのログエントリが表示されることを確認する。
+追加したものを含む、すべてのログのログエントリが表示されることを確認します。
 
 # Clean up
 
-シェルから抜ける。
+シェルから抜けます。
 
 ```shell
 exit
 ```
 
-Pongoを停止する。
+Pongoを停止します。
 
 ```shell
 pongo down

@@ -8,7 +8,7 @@ Pongoを実行するために以下が必要となります。
   ```
   brew install coreutils
   ```
-
+- あなたの環境に応じて、いくつかの[環境変数](#environment-variables)を設定する必要があります。
 
 ## kong plugin templateのclone (カレントディレクトリのものを使う場合は不要)
 
@@ -83,14 +83,6 @@ pongo down
 
 ## Test dependencies
 
-Pongo can use a set of test dependencies that can be used to test against. Each
-can be enabled/disabled by respectively specifying `--[dependency_name]` or
-`--no-[dependency-name]` as options for the `pongo up`, `pongo restart`, and
-`pongo run` commands. The alternate way of specifying the dependencies is
-by adding them to the `.pongo/pongorc` file (see below).
-
-The available dependencies are:
-
 Pongo では、テストに使う依存関係のセットを使うことができます。それぞれ`--[dependency_name]` または`--no-[dependency-name]` を `pongo up`, `pongo restart`, `pongo run` コマンドのオプションとして指定します。
 依存関係を指定する別の方法は`.pongo/pongorc` ファイルに追加することです（下記参照）。
 
@@ -100,11 +92,6 @@ Pongo では、テストに使う依存関係のセットを使うことがで�
 
   - `--no-postgres`で無効化できる
   - `POSTGRES`環境変数でバージョン指定できる
-
-- **Cassandra** Kongのデータストア (デフォルトで指定される)
-
-  - `--no-cassandra`で無効化できる
-  - `CASSANDRA`環境変数でバージョン指定できる
 
 - **grpcbin**  grpcのバックエンドのモック
 
@@ -119,7 +106,7 @@ Pongo では、テストに使う依存関係のセットを使うことがで�
   - `--redis`で有効化できる
   - `REDIS`環境変数でバージョン指定できる
   - 環境内から`redis:6379`でアクセスできる。
-    しかし他の環境への移行性を考慮し、test specからは`helpers.redis_host`フィールドと`6379`ポートを使ってアクセスすべきである。
+    ※他環境への移行性の観点から、test specからはヘルパーモジュールを使って`helpers.redis_host`フィールドと`6379`ポートを使ってアクセスすべき
     Example:
     ```shell
     local helpers = require "spec.helpers"
@@ -167,14 +154,15 @@ Pongo では、テストに使う依存関係のセットを使うことがで�
     ```
 
 ### 依存関係のデフォルト値の設定
-デフォルトはプラグインの種類によっては意味を成しませんし、依存関係によっては（例えばCassandra）テストが遅くなることもあります。そこで、プロジェクトやプラグインごとにデフォルトを上書きするために、`.pongo/pongorc`ファイルをプロジェクトに追加します。
+デフォルト値はプラグインによっては利用せず、依存関係によっては（例えばCassandra）テストが遅くなることもあります。
+そこで、プロジェクトやプラグインごとにデフォルト設定を上書きするために、`.pongo/pongorc`ファイルをプロジェクトに追加します。
 
-ファイルのフォーマットはとてもシンプルです。各行には1つのコマンドラインオプションが含まれています。例えば、PostgresとRedisだけが必要なプラグイン用の`.pongo/pongorc`ファイルです：
+ファイルのフォーマットはとてもシンプルです。各行には1つのコマンドラインオプションが含まれています。例えば、PostgresとRedisだけが必要なプラグイン用の`.pongo/pongorc`ファイルは以下になります。
 
 ```shell
---no-cassandra
 --redis
 ```
+
 ### 依存関係のトラブルシューティング
 
 依存関係のあるコンテナが問題を起こしているときは、`pongo logs` コマンドを使ってログにアクセスすることができます。
@@ -210,7 +198,7 @@ pongo logs -f postgres
 
 これは別のコンテナとして実装されており、そのコンテナはすべてのポートを開き、docker network上で実際のサービスコンテナに中継します（この理由は、通常のPongoの実行はホスト上ですでに使われているポートに干渉しないためです。）
 
-これは技術的には 「依存関係 」なので、依存関係として指定することもできます。
+これは技術的には「依存関係」なので、依存関係として指定することもできます。
 
 ```shell
     pongo up

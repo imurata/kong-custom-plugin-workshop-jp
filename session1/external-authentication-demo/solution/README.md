@@ -3,14 +3,6 @@
 cd kong-plugin
 ```
 
-### 依存関係のデフォルト値の設定
-
-Cssandraが不要な場合は `.pongo/pongorc` を編集して無効化してください。
-
-```shell
---no-cassandra
-```
-
 ## Pongoの起動
 
 ```shell
@@ -60,7 +52,7 @@ http POST :8001/services/example-service/routes name=example-route paths:='["/ec
 
 ## MyPluginをServiceに追加
 
-デフォルトの認証URLは http://httpbin.org/status/200 にセットされている。
+デフォルトの認証URLは http://httpbin.org/status/200 にセットされています。
 
 ```shell
 http -f :8001/services/example-service/plugins name=myplugin
@@ -107,7 +99,7 @@ X-Kong-Upstream-Latency: 3
 
 ```
 
-403が返ってくる認証URLに変更する。
+403が返ってくる認証URLに変更します。
 
 ```shell
 http :8001/services/example-service/plugins

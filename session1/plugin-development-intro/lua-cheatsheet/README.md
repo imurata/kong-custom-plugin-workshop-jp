@@ -212,68 +212,69 @@ t[key]=value
 -- __call(func, ...)
 ```
 
-## API: Global function (ref)
+## API: グローバル関数
 
 ```lua
-dofile("hello.lua")
-loadfile("hello.lua")
+dofile("hello.lua")  -- Luaファイルを読み込み実行
+loadfile("hello.lua") -- Luaファイルを読み込むだけ
 
 assert(x)    -- x かどうか (errorをあげる)
 assert(x, "failed")
 
 type(var)   -- "nil" | "number" | "string" | "boolean" | "table" | "function" | "thread" | "userdata"
 
--- メタメソッドを呼び出さない (__index and __newindex)
-rawset(t, index, value)    -- Like t[index] = value
-rawget(t, index)           -- Like t[index]
+-- メタメソッドを呼び出さない (__indexと__newindexを使わない)
+rawset(t, index, value)    -- t[index] = value をメタテーブルを使わず実装
+rawget(t, index)           -- t[index] をメタテーブルを使わず実装
 
 _G  -- グローバルコンテキスト
-setfenv(1, {})  -- 1: 現在の関数, 2: 呼び出し元など -- {}: the new _G
+setfenv(1, {})  -- _Gを切り替える（Lua5.2以降では利用できない）
 
 pairs(t)     -- {key, value}の反復可能リスト
 ipairs(t)    -- {index, value}の反復可能リスト
 
-tonumber("34")
+tonumber("34")  -- 文字列を数値に変換
 tonumber("8f", 16)
-API: Strings
-'string'..'concatenation'
-
-s = "Hello"
-s:upper()
-s:lower()
-s:len()    -- #s のようなもの
-
-s:find()
-s:gfind()
-
-s:match()
-s:gmatch()
-
-s:sub()
-s:gsub()
-
-s:rep()
-s:char()
-s:dump()
-s:reverse()
-s:byte()
-s:format()
 ```
-
-## API: Tables
+## API: 文字列
 
 ```lua
-table.foreach(t, function(row) ... end)
-table.setn
-table.insert(t, 21)          -- append (--> t[#t+1] = 21)
-table.insert(t, 4, 99)
-table.getn
-table.concat
-table.sort
-table.remove(t, 4)
+'文字列'..'連結'
+
+s = "Hello"
+s:upper()   -- 文字列を大文字に変換
+s:lower()   -- 文字列を小文字に変換
+s:len()     -- 文字列長の取得　※Luaだと#sでも文字列長が取得できる
+
+s:find("l")    -- 文字列内で部分文字列を検索し、最初に見つかった開始位置と終了位置を返答
+s:gfind("%w+")   -- 文字列検索の反復子を生成　※5.2以降で非推奨でありgmatchへの移行が推奨
+
+s:match("l+")   -- パターンに一致する最初の部分文字列を返答
+s:gmatch(".")  -- パターンに一致する部分文字列を順に返す反復子を生成
+
+s:sub(2, 4)     -- 文字列の指定した範囲を抽出
+s:gsub("l", "1")    -- 指定したパターンに一致する部分を置換し、新しい文字列と置換回数を返答
+
+s:rep(3)     -- 文字列を指定回数繰り返した新しい文字列を返答
+string.char(65)    -- 数値を文字コードとして扱い、対応する文字列を生成
+string.dump(function)    -- 関数をバイナリ文字列としてシリアライズ
+s:reverse() -- 文字列を反転した新しい文字列を返答
+s:byte(2)    -- 文字列内の指定位置の文字の文字コードを返答
+string.format("Hello, %s!", "Lua")  -- Cの`printf`スタイルで文字列をフォーマット
 ```
 
-## API: Math (ref)
+## API: テーブル
+
+```lua
+table.foreach(t, function(key, value) ... end) -- -- テーブル`t`のすべてのキーと値に対して、指定した関数を適用 ※5.2から削除
+table.insert(t, 21)          -- テーブル`t`の末尾に値`21`を追加
+table.insert(t, 4, 99)       -- テーブル`t`の4番目の位置に値`99`を挿入
+table.concat(t, " ", 1, 3)  -- 指定範囲内のテーブル内のインデックスの文字列を連結し、1つの文字列として返答。文字間を繋ぐセパレータを指定することも可能。
+table.sort(t, function)  -- テーブルを昇順でソート（オプションでカスタムの比較関数を指定）
+table.remove(t, 4)  -- テーブル`t`の4番目の要素を削除し、削除した値を返答（後続の要素は左にシフトされる）
+```
+
+## API: 数学ライブラリ
 
 ```lua
 math.abs     math.acos    math.asin       math.atan    math.atan2

@@ -1,15 +1,17 @@
 ## Introduction
-.envをKong EEライセンス(必要な場合)、Kongのバージョン、Postgresのバージョンについて更新します。
+.envを必要に応じてKong EEライセンス、Kongのバージョン、Postgresのバージョンについて更新します。
+ライセンスが必要な場合は以下のようにして環境変数に設定します。
+```bash
+export KONG_LICENSE_DATA=$(cat license.json)
+```
 
-localhostにKong Gatewayを立てない場合はKONG_PORTAL_GUI_URLとKONG_ADMIN_GUI_URLをホストIPに変更します。
-
+localhostを使ってKong Gatewayにアクセスしない場合はdocker-compose.yml内のKONG_ADMIN_GUI_URLを以下のようにアクセス先アドレスに変更します。
 ```sh
 sed -i 's/localhost/<Your Host IP>/g' docker-compose.yml
 ```
-docker-composeを使用してKong GatewayとDBコンテナを起動します。docker-composeを起動する前に、データベースの初期化を実行する必要があります。
+docker-composeを使用してKong GatewayとDBコンテナを起動します。
 
 ```shell
-docker-compose run kong kong migrations bootstrap
 docker-compose up -d
 ```
 
