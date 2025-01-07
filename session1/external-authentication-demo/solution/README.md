@@ -124,13 +124,13 @@ Authentication Failed
 
 # Clean up
 
-シェルから抜ける。
+シェルから抜けます。
 
 ```shell
 exit
 ```
 
-Pongoを停止する。
+Pongoを停止します。
 
 ```shell
 pongo down

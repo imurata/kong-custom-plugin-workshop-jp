@@ -74,6 +74,7 @@ function plugin:access(plugin_conf)
     routes = {}
   }
 
+  -- DBからServiceを取得し、set.services に格納
   for row, err in kong.db.services:each() do
     if err then
       kong.log.err(err)
@@ -85,6 +86,7 @@ function plugin:access(plugin_conf)
     end
   end
 
+  -- DBからRouteを取得し、set.routes に格納
   for row, err in kong.db.routes:each() do
     if err then
       kong.log.err(err)
@@ -96,6 +98,7 @@ function plugin:access(plugin_conf)
     end
   end
 
+  -- ServiceとRouteの情報を含むテーブルをレスポンスとして返す
   return kong.response.exit(200, set)
 
 end --]]

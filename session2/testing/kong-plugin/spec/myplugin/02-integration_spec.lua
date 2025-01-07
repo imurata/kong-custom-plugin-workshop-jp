@@ -1,22 +1,29 @@
+-- テストヘルパー関数をインポート
 local helpers = require "spec.helpers"
-
+-- プラグイン名を定義
 local PLUGIN_NAME = "myplugin"
-
+-- 使用するデータベースストラテジーを指定
 local strategy = "postgres"
 
+-- describeブロック: プラグインの動作に関するテストを記述
 describe(PLUGIN_NAME .. ": (access) [#" .. strategy .. "]", function()
+    -- クライアントを保持する変数を定義
     local client
 
+    -- lazy_setupブロック: テスト実行前にKongを起動
     lazy_setup(function()
+        -- テスト用データベースとプラグインをセットアップ
+        local bp = helpers.get_db_utils(
+            strategy == "off" and "postgres" or strategy, 
+            nil, 
+            {PLUGIN_NAME})
 
-        local bp = helpers.get_db_utils(strategy == "off" and "postgres" or strategy, nil, {PLUGIN_NAME})
-
-        -- Inject a test route. No need to create a service, there is a default
-        -- service which will echo the request.
+        -- テスト用ルートを作成
+        -- サービスを作成する必要はなく、デフォルトサービスが使用される（リクエストをエコーする動作）
         local route1 = bp.routes:insert({
             hosts = {"test1.com"}
         })
-        -- add the plugin to test to the route we created
+        -- 作成したルートにプラグインを適用
         bp.plugins:insert{
             name = PLUGIN_NAME,
             route = {
@@ -25,61 +32,72 @@ describe(PLUGIN_NAME .. ": (access) [#" .. strategy .. "]", function()
             config = {}
         }
 
-        -- start kong
+        -- Kongの起動
         assert(helpers.start_kong({
-            -- set the strategy
+            -- 使用するデータベースストラテジー
             database = strategy,
-            -- use the custom test template to create a local mock server
+            -- カスタムNginxテンプレートを指定
             nginx_conf = "spec/fixtures/custom_nginx.template",
-            -- make sure our plugin gets loaded
+            -- プラグインをロード
             plugins = "bundled," .. PLUGIN_NAME,
-            -- write & load declarative config, only if 'strategy=off'
-            declarative_config = strategy == "off" and helpers.make_yaml_file() or nil
+            -- ストラテジーが"off"の場合は宣言的設定を作成
+            declarative_config = strategy == "off" 
+              and helpers.make_yaml_file() 
+              or nil
         }))
     end)
 
+    -- lazy_teardown: テスト環境のクリーンアップ
     lazy_teardown(function()
         helpers.stop_kong(nil, true)
     end)
 
+    -- before_eachブロック: テスト実行前にクライアントを初期化
     before_each(function()
         client = helpers.proxy_client()
     end)
 
+    -- after_eachブロック: テスト実行後にクライアントをクローズ
     after_each(function()
         if client then
             client:close()
         end
     end)
 
+    -- describeブロック: リクエストヘッダーとレスポンスヘッダーのテストを記述
     describe("request", function()
+        -- テスト1: "hello-world"ヘッダーを確認
         it("gets a 'hello-world' header", function()
+            -- プロキシ経由でリクエストを送信
             local r = client:get("/request", {
                 headers = {
                     host = "test1.com"
                 }
             })
-            -- validate that the request succeeded, response status 200
+            -- レスポンスが成功し、ステータスコード200を返すことを確認
             assert.response(r).has.status(200)
-            -- now check the request (as echoed by mockbin) to have the header
+            -- モックサーバーがエコーしたリクエストヘッダーに"hello-world"が含まれることを確認
             local header_value = assert.request(r).has.header("hello-world")
-            -- validate the value of that header
+            -- "hello-world"ヘッダーの値が期待通りであることを確認
             assert.equal("this is on a request", header_value)
         end)
     end)
 
+    -- describeブロック: レスポンス関連のテストを記述
     describe("response", function()
+        -- テスト2: "bye-world"ヘッダーを確認
         it("gets a 'bye-world' header", function()
+            -- プロキシ経由でリクエストを送信
             local r = client:get("/request", {
                 headers = {
                     host = "test1.com"
                 }
             })
-            -- validate that the request succeeded, response status 200
+            -- レスポンスが成功し、ステータスコード200を返すことを確認
             assert.response(r).has.status(200)
-            -- now check the response to have the header
+            -- レスポンスヘッダーに"bye-world"が含まれることを確認
             local header_value = assert.response(r).has.header("bye-world")
-            -- validate the value of that header
+            -- "bye-world"ヘッダーの値が期待通りであることを確認
             assert.equal("this is on the response", header_value)
         end)
     end)

@@ -1,11 +1,11 @@
-## Bring up pongo dependencies
+## Pongoの起動
 
 ```shell
 cd kong-plugin
 pongo up
 ```
 
-To specify different versions of the dependencies or image or license_data
+異なるバージョン、イメージ、license_dataを指定するには環境変数を設定します。
 
 ```shell
 KONG_VERSION=2.3.x pongo up
@@ -13,42 +13,42 @@ POSTGRES=10 KONG_VERSION=2.3.x pongo up
 POSTGRES=10 KONG_LICENSE_DATA=<your_license_data> pongo up
 ```
 
-## Expose services
+## Serviceの公開
 
 ```shell
 pongo expose
 ```
 
-## Create a Kong container and attach a shell
+## Kongイメージをシェルで起動してアタッチ
 
 ```shell
 pongo shell
 ```
 
-The following commands should be run from within the Kong shell
+以下のコマンドは Kong シェルから実行する必要があります。
 
-## Boostrap the database
+## データベースの初期化
 
 ```shell
 kong migrations bootstrap --force
 kong start
 ```
 
-## Add a service
+## Serviceの追加
 
 ```shell
 http POST :8001/services name=example-service url=http://httpbin.org
 ```
 
-## Add a Route to the Service
+## RouteをServiceに追加
 
 ```shell
 http POST :8001/services/example-service/routes name=example-route paths:='["/echo"]'
 ```
 
-### Test
+### テスト
 
-Enable plugin
+プラグインを有効にしアクセスし、ServiceとRouteの一覧が取得できるか確認します。
 
 ```shell
 http -f :8001/services/example-service/plugins name=myplugin
@@ -114,13 +114,13 @@ X-Kong-Response-Latency: 11
 
 # Clean up
 
-Exit from the shell created to the Kong container
+シェルから抜けます。
 
 ```shell
 exit
 ```
 
-Remove Pongo dependencies
+Pongoを停止します。
 
 ```shell
 pongo down

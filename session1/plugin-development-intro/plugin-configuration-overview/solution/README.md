@@ -52,7 +52,7 @@ http POST :8001/services/example-service/routes name=example-route paths:='["/ec
 
 ### Test 1
 
-プラグインを有効化し"Accept" Headerを削除する。
+プラグインを有効化し"Accept" Headerを削除します。
 
 ```shell
 http -f :8001/services/example-service/plugins name=myplugin config.remove_request_headers=accept
@@ -101,7 +101,7 @@ X-Kong-Upstream-Latency: 5
 
 ### Test 2
 
-プラグインを有効化し"Accept-Encoding" Headerを削除する。
+プラグインを有効化し"Accept-Encoding" Headerを削除します。
 
 ```shell
 http :8001/services/example-service/plugins
@@ -153,7 +153,7 @@ X-Kong-Upstream-Latency: 4
 
 ### Test 3
 
-プラグインを有効化し"Accept"と"Accept-Encoding" Headerを削除する。
+プラグインを有効化し"Accept"と"Accept-Encoding" Headerを削除します。
 
 ```shell
 http :8001/services/example-service/plugins
@@ -203,13 +203,13 @@ X-Kong-Upstream-Latency: 2
 
 # Clean up
 
-シェルから抜ける。
+シェルから抜けます。
 
 ```shell
 exit
 ```
 
-Pongoを停止する。
+Pongoを停止します。
 
 ```shell
 pongo down

@@ -57,7 +57,7 @@ pongo down
 
 ## 実行する
 
-以下を実行してテストが実行されることを確認する。
+以下を実行してテストが実行されることを確認します。
 ```shell
 cd kong-plugin
 pongo run --no-cassandra
