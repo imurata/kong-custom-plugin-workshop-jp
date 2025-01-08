@@ -29,13 +29,13 @@ Comment line 17 and uncomment line 18 & 19.
 
 または、masterブランチにプッシュしてコミットすると、ワークフローが自動的に実行されます。
 
-## Review result
+## 結果の確認
 
-After the pipeline runs, click into it.
+パイプライン実行後、ワークフローをクリックします。
 ![](assets/review-result.png)
 
-There should have an artifact, download it.
+Artifactがあるはずなので、それをダウンロードします。
 ![](assets/review-result2.png)
 
-Unzip the downloaded zip file, you should see the rock binary file.
+ダウンロード物を解凍し、rockファイルがあることを確認します。
 ![](assets/review-result3.png)

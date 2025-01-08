@@ -37,17 +37,17 @@ jobs:
           sudo apt-get install -y luarocks
           git clone https://github.com/Kong/kong-pongo.git
 
-      # Pongo run.
+      # Pongo run
       - name: Run Pongo
         run: |
-          cd session2/github-actions
+          cd session3/github-actions
           ../../kong-pongo/pongo.sh lint
           ../../kong-pongo/pongo.sh run
 
       # Build artifact
       - name: Make rock
         run: |
-          cd session2/github-actions
+          cd session3/github-actions
           pongo pack
 
       # Upload Artifact to GitHub
@@ -55,4 +55,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: |
-            session2/github-actions/*.rock
+            session3/github-actions/*.rock
