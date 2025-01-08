@@ -27,7 +27,7 @@ Comment line 17 and uncomment line 18 & 19.
 手動でワークフローを実行するには、"Actions"タブをクリックし、"All workflows"の下にある"CI"を選択し、"Run workflow"をクリックします。
 ![](assets/run-workflow.png)
 
-Or push and commit to master branch for running workflow automatically.
+または、masterブランチにプッシュしてコミットすると、ワークフローが自動的に実行されます。
 
 ## Review result
 
