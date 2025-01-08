@@ -37,7 +37,7 @@ jobs:
           sudo apt-get install -y luarocks
           git clone https://github.com/Kong/kong-pongo.git
 
-      # Pongo run
+      # Pongo run.
       - name: Run Pongo
         run: |
           cd session2/github-actions
