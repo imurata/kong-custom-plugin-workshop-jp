@@ -1,20 +1,21 @@
-## Problem Statement
+## 問題の説明
 
-Custom Authentication Security Lab
+カスタム認証セキュリティラボ
 
-Build a  custom plugin that reaches out to an external service for each call to the plugin. The URL for the external service should be provided as a plugin configuration
+プラグインへの呼び出しごとに外部サービスにアクセスするカスタムプラグインを構築します。外部サービスのURLはプラグインの設定値として提供する必要があります。
 
-The external service for authentication will be provided as a docker container
+認証用の外部サービスは Docker コンテナとして提供されます。試してみるには、`auth-service`ディレクトリ内の ReadMe を参照してください。
 
-The API caller will specify two parameters with the call
-- A bearer token
-- A customer ID
-When starting the authentication service, you can specify a list of valid bearer tokens and customer IDs
+API呼び出し側は呼び出し時に2つのパラメータを指定します。
 
-The custom plugin will
-- Call the /auth/validate/token endpoint to validate the bearer token supplied by the API caller (Authentication)
-- Call the /auth/validate/customer endpoint to validate the customer ID supplied by the API caller (Authorization)
+- Bearerトークン
+- 顧客ID
 
-If both succeed, the request is considered authenticated and the plugin sends it to the upstream endpoint
-If either fails, the plugin will terminate the request with an appropriate error
+認証サービスを開始するときに、有効なBearerトークンと顧客IDのリストを指定できます。
 
+カスタムプラグインは以下の機能を持ちます。
+- /auth/validate/token エンドポイントを呼び出して、API呼び出し元から提供されたBearerトークンを検証します (認証)
+- /auth/validate/customer エンドポイントを呼び出して、API 呼び出し元から提供された顧客IDを検証します (承認)
+
+両方が成功した場合、リクエストは認証されたとみなされ、プラグインはそれを上流のエンドポイントに送信します。
+どちらかが失敗した場合、プラグインは適切なエラーを返してリクエストを終了します。
