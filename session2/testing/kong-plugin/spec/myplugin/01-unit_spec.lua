@@ -44,6 +44,7 @@ describe(PLUGIN_NAME .. ": (schema)", function()
     -- エラー内容を確認
     assert.is_same({
       ["config"] = {
+        -- entity_checksでエラー時はinsert_entity_errorによって@entityというキーでエラーが記録される
         ["@entity"] = {
           [1] = "values of these fields must be distinct: 'request_header', 'response_header'"
         }
@@ -68,6 +69,7 @@ describe(PLUGIN_NAME .. ": (schema)", function()
   -- テスト4: 無効な値がremove_request_headersに設定された場合
   it("does not accept invalid value for remove_request_headers", function()
     -- 無効なヘッダー名を設定
+    -- typedefs.header_name（実態はvalidate_header_name）は^[a-zA-Z0-9-_]+$のみ許可
     local ok, err = validate({
         remove_request_headers = {"they-@-#"},
       })
@@ -75,6 +77,7 @@ describe(PLUGIN_NAME .. ": (schema)", function()
     -- エラー内容が期待通りであることを確認
     assert.is_same({
       ["config"] = {
+        -- 個々のパラメータでエラー時はパラメータ名でエラーを確認可能。メッセージはvalidate_header_nameで定義
         ["remove_request_headers"] = {
           [1] = "bad header name 'they-@-#', allowed characters are A-Z, a-z, 0-9, '_', and '-'"
         }
