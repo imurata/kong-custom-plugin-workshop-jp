@@ -12,7 +12,7 @@ describe(PLUGIN_NAME .. ": (access) [#" .. strategy .. "]", function()
 
     -- lazy_setupブロック: テスト実行前にKongを起動
     lazy_setup(function()
-        -- テスト用データベースとプラグインをセットアップ
+        -- テスト用データベースとプラグインをセットアップ（プラグインのスキーマのロード）
         local bp = helpers.get_db_utils(
             strategy == "off" and "postgres" or strategy, 
             nil, 
