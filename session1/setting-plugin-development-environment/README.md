@@ -14,6 +14,7 @@ Pongoを実行するために以下が必要となります。
 
 ```shell
 git clone https://github.com/Kong/kong-plugin
+cd kong-plugin
 ```
 
 ## PongのDownloadとsetup
